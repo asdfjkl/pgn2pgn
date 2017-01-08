@@ -36,6 +36,12 @@ PgnPrinter::PgnPrinter() {
     this->forceMoveNumber = true;
 }
 
+
+PgnPrinter::~PgnPrinter() {
+    this->pgn->clear();
+    delete this->pgn;
+}
+
 void PgnPrinter::reset() {
     this->pgn->clear();
     this->currentLine = QString("");
@@ -122,7 +128,9 @@ QStringList* PgnPrinter::printGame(Game *g) {
 
     this->reset();
 
-    pgn = new QStringList();
+    this->pgn->clear();
+    //delete pgn;
+    //this->pgn = new QStringList();
 
     // first print the headers
     this->printHeaders(pgn, g);
@@ -140,7 +148,7 @@ QStringList* PgnPrinter::printGame(Game *g) {
     this->printResult(g->getResult());
     this->pgn->append(this->currentLine);
 
-    return pgn;
+    return new QStringList(*this->pgn);
 
 }
 

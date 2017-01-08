@@ -35,6 +35,8 @@ public:
      */
     PgnPrinter();
 
+    ~PgnPrinter();
+
     /**
      * @brief printGame prints the supplied game to PGN format and saves the
      *                         generated lines a string list

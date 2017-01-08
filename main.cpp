@@ -78,33 +78,39 @@ int main(int argc, char *argv[])
 
     const char* encoding = pgnreader->detect_encoding(pgnFileName);
 
-    QList<chess::HeaderOffset*> *offsets = new QList<chess::HeaderOffset*>();
+    QList<quint64> *offsets = new QList<quint64>();
 
     bool stop = false;
     while(!stop) {
         chess::HeaderOffset *header = new chess::HeaderOffset();
+        delete header->headers;
         int res = pgnreader->readNextHeader(pgnFileName, encoding, &offset, header);
         if(res < 0) {
             stop = true;
+            delete header;
             continue;
         }
-        offsets->append(header);
+        offsets->append(header->offset);
+        header->headers->clear();
+        delete header->headers;
+        delete header;
     }
-
     chess::PgnPrinter *pp = new chess::PgnPrinter();
     QFile fOut(dbFileName);
     bool success = false;
     if(fOut.open(QFile::WriteOnly | QFile::Text)) {
         QTextStream s(&fOut);
         for(int i=0;i<offsets->count();i++) {
-            chess::HeaderOffset* header_i = offsets->at(i);
-            chess::Game *g = pgnreader->readGameFromFile(pgnFileName, encoding, header_i->offset);
-            g->headers = header_i->headers;
+            quint64 offset_i = offsets->at(i);
+            chess::Game *g = pgnreader->readGameFromFile(pgnFileName, encoding, offset_i);
+            //g->headers = header_i->headers;
             QStringList *pgn = pp->printGame(g);
             for (int i = 0; i < pgn->size(); ++i) {
                 s << pgn->at(i) << '\n';
             }
             delete g;
+            pgn->clear();
+            delete pgn;
             s << '\n' << '\n';
         }
         success = true;
@@ -116,6 +122,10 @@ int main(int argc, char *argv[])
         throw std::invalid_argument("Error writing file");
     }
 
+    offsets->clear();
+    delete offsets;
+    delete pgnreader;
+    delete pp;
     return 0;
 }
 

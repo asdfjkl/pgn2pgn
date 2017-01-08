@@ -54,7 +54,7 @@ const char* PgnReader::detect_encoding(const QString &filename) {
     QTextCodec::ConverterState state;
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
 
-    int iterations = 40;
+    int iterations = 100;
     int i=0;
     int l = 100;
     bool isUtf8 = true;
